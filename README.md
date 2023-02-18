@@ -1,5 +1,3 @@
-# rewards_point_calcservice
-
 
 Run spring boot app.
 open H2 console: http://localhost:8080/h2-console
@@ -25,91 +23,88 @@ Insert into CUSTOMER_TRANSACTION (TRANSACION_ID,CUSTOMER_ID,TRANS_AMOUNT,TRANS_D
 
 request 1: 
 
-curl --location --request GET 'localhost:8080/rewards' \
---header 'Content-Type: application/json' \
---data-raw '{"transactionAmount" : 120}'
+curl --location --request GET 'localhost:8080/rewards'
 
 response 1:
 
-90
+[
+    {
+        "customerId": 3,
+        "totalRewards": 620,
+        "transactions": {
+            "2023-02": {
+                "totalRewardsPerMonth": 620,
+                "transations": [
+                    {
+                        "transactionId": 1,
+                        "transactionAmt": 180.00,
+                        "rewardPoints": 210
+                    },
+                    {
+                        "transactionId": 2,
+                        "transactionAmt": 280.00,
+                        "rewardPoints": 410
+                    },
+                    {
+                        "transactionId": 3,
+                        "transactionAmt": 30.00,
+                        "rewardPoints": 0
+                    }
+                ]
+            }
+        }
+    }
+]
 
 request 2:
 
-curl --location --request GET 'localhost:8080/rewardsByCustId' \
---header 'Content-Type: application/json' \
---data-raw '{"custId": 1}'
+curl --location --request GET 'localhost:8080/rewardsByCustomerId/3'
 
 response 2:
 
 {
-    "custId": 1,
-    "totalRewardsPoint": 3240,
+    "customerId": 3,
+    "totalRewards": 620,
     "transactions": {
         "2023-02": {
-            "monthyRewardPoint": 1040,
+            "totalRewardsPerMonth": 620,
             "transations": [
                 {
-                    "transId": 4,
-                    "transAmt": 80.00,
-                    "rewardPoint": 30
+                    "transactionId": 1,
+                    "transactionAmt": 180.00,
+                    "rewardPoints": 210
                 },
                 {
-                    "transId": 5,
-                    "transAmt": 50.00,
-                    "rewardPoint": 0
+                    "transactionId": 2,
+                    "transactionAmt": 280.00,
+                    "rewardPoints": 410
                 },
                 {
-                    "transId": 6,
-                    "transAmt": 520.00,
-                    "rewardPoint": 890
-                },
-                {
-                    "transId": 9,
-                    "transAmt": 80.00,
-                    "rewardPoint": 30
-                },
-                {
-                    "transId": 10,
-                    "transAmt": 120.00,
-                    "rewardPoint": 90
-                }
-            ]
-        },
-        "2023-01": {
-            "monthyRewardPoint": 2110,
-            "transations": [
-                {
-                    "transId": 2,
-                    "transAmt": 130.00,
-                    "rewardPoint": 110
-                },
-                {
-                    "transId": 3,
-                    "transAmt": 150.00,
-                    "rewardPoint": 150
-                },
-                {
-                    "transId": 7,
-                    "transAmt": 1000.00,
-                    "rewardPoint": 1850
-                }
-            ]
-        },
-        "2023-03": {
-            "monthyRewardPoint": 90,
-            "transations": [
-                {
-                    "transId": 1,
-                    "transAmt": 120.00,
-                    "rewardPoint": 90
-                },
-                {
-                    "transId": 8,
-                    "transAmt": 10.00,
-                    "rewardPoint": 0
+                    "transactionId": 3,
+                    "transactionAmt": 30.00,
+                    "rewardPoints": 0
                 }
             ]
         }
     }
 }
 
+
+Save Transaction:
+
+curl --location --request POST 'localhost:8080/saveTransaction' \
+--header 'Content-Type: application/json' \
+--data-raw '[
+    {
+        "customerId": 3,
+        "transactionAmt": 180.00
+    },
+    {
+        "customerId": 3,
+        "transactionAmt": 280.00
+    },
+    {
+        "customerId": 3,
+        "transactionAmt": 30.00
+    }
+]'
