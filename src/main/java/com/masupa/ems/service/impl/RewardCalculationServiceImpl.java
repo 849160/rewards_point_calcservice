@@ -22,10 +22,9 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CalculateServiceImpl implements RewardCalculationService {
+public class RewardCalculationServiceImpl implements RewardCalculationService {
 
 	private final CustomerTransactionDAO dao;
-
 
 	private Long calculatePoints(BigDecimal transactionAmount) {
 		Long rewardPoints = 0L;
@@ -45,9 +44,10 @@ public class CalculateServiceImpl implements RewardCalculationService {
 	}
 
 	@Override
-	public RewardsByMonth rewardsByCustId(Long customerId) {	
-		List<CustomerTransaction> translist = dao.findByCustomerId(customerId);		
-		 return calculateRewards(customerId,translist);
+	public RewardsByMonth rewardsByCustId(Long customerId) {
+		LocalDate threeMonthsAgoDate = LocalDate.now().minusMonths(3);
+		List<CustomerTransaction> translist = dao.findByCustomerId(customerId,threeMonthsAgoDate);
+		return calculateRewards(customerId, translist);
 	}
 
 	private RewardsByMonth calculateRewards(Long customerId, List<CustomerTransaction> translist) {
@@ -87,20 +87,23 @@ public class CalculateServiceImpl implements RewardCalculationService {
 	@Override
 	public List<RewardsByMonth> rewardsByAllCustomers() {
 		List<RewardsByMonth> response = new ArrayList<>();
-		List<CustomerTransaction> customerTransactions = dao.findAll();	
+		LocalDate threeMonthsAgoDate = LocalDate.now().minusMonths(3);
+		List<CustomerTransaction> customerTransactions = dao.findAllTransaction(threeMonthsAgoDate);
 		Map<Long, List<CustomerTransaction>> translistByCustomerId = customerTransactions.stream()
-				.collect(Collectors.groupingBy(CustomerTransaction :: getCustomerId));
+				.collect(Collectors.groupingBy(CustomerTransaction::getCustomerId));
 		for (Map.Entry<Long, List<CustomerTransaction>> entry : translistByCustomerId.entrySet()) {
-			response.add(calculateRewards(entry.getKey(),entry.getValue()));
+			response.add(calculateRewards(entry.getKey(), entry.getValue()));
 		}
-		 return response;
+		return response;
 	}
 
 	@Override
 	public List<CustomerTransaction> saveTransaction(List<TransactionRequest> transactionRequest) {
 		List<CustomerTransaction> customerTransactions = new ArrayList<>();
-		for(TransactionRequest transaction:transactionRequest) {
-			CustomerTransaction customerTransaction = CustomerTransaction.builder().customerId(transaction.getCustomerId()).transactionAmt(transaction.getTransactionAmt()).transactionDate(LocalDate.now()).build();
+		for (TransactionRequest transaction : transactionRequest) {
+			CustomerTransaction customerTransaction = CustomerTransaction.builder()
+					.customerId(transaction.getCustomerId()).transactionAmt(transaction.getTransactionAmt())
+					.transactionDate(transaction.getTransactionDate()).build();
 			customerTransactions.add(customerTransaction);
 		}
 		return dao.saveAll(customerTransactions);
